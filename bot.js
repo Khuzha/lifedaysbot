@@ -26,11 +26,11 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
   let now = Date.now()
 
 
-  if (textArr[0] > 28 && (textArr[2] % 4 !== 0)) {
+  if (textArr[0] > 28 && (textArr[2] % 4 !== 0) && textArr[1] == '02') {
     return ctx.reply(`${textArr[2]} wasn't a leap year. Try again`)
   }
 
-  if (date == 'Invalid Date' || textArr[0] > 29) {
+  if (date == 'Invalid Date' || (textArr[1] == '02' && textArr[0] > 29)) {
     return ctx.reply('Your date is invalid. Please send me correct one.')
   }
   
