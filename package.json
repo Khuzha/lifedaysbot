@@ -1,0 +1,25 @@
+{
+  "name": "lifedaysbot",
+  "version": "1.0.0",
+  "description": "lifedaysbot",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Khuzha/lifedaysbot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Khuzha/lifedaysbot/issues"
+  },
+  "homepage": "https://github.com/Khuzha/lifedaysbot#readme",
+  "dependencies": {
+    "mongodb": "^3.2.7",
+    "nodemon": "^1.19.1",
+    "telegraf": "^3.30.1"
+  }
+}
