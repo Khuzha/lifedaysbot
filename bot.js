@@ -56,12 +56,18 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
   today.length == 1 ? today = '0' + today : false
   thisMonth.length == 1 ? thisMonth = '0' + thisMonth : false
 
+  const nowHours = now.getUTCHours().toString().length == 1 ? '0' + now.getUTCHours() : now.getUTCHours()
+  const nowMinutes = now.getUTCMinutes().toString().length == 1 ? '0' + now.getUTCMinutes() : now.getUTCMinutes()
+  const nowSeconds = now.getUTCSeconds().toString().length == 1 ? '0' + now.getUTCSeconds() : now.getUTCSeconds()
+
   ctx.reply(
-    `Today is ${today}.${thisMonth}.${thisYear}. You was born in ${ctx.message.text}` +
+    `Now it's ${nowHours}:${nowMinutes}:${nowSeconds} ` + 
+    `<a href="https://www.timeanddate.com/time/aboututc.html">UTC (Coordinated Universal Time)</a>, ` +
+    `${today}.${thisMonth}.${thisYear}. \nYou were born in ${ctx.message.text}.` +
     `\n\nYour life in: \n` + 
     `\nYears: ${years} \nMonths: ${commafy(months)} \nWeeks: ${commafy(weeks)} \nDays: ${commafy(days)}` +
     `\nHours: ${commafy(hours)} \nMinutes: ${commafy(minutes)} \nSeconds: ${commafy(seconds)} \nMilliseconds: ${commafy(milliseconds)}`,
-    { reply_markup: data.keyboard }
+    { reply_markup: data.keyboard, parse_mode: 'html', disable_web_page_preview: true }
   )
 
   updateStat('date')
