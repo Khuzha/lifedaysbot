@@ -67,7 +67,12 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
     `\n\nYour life in: \n` + 
     `\nYears: ${years} \nMonths: ${commafy(months)} \nWeeks: ${commafy(weeks)} \nDays: ${commafy(days)}` +
     `\nHours: ${commafy(hours)} \nMinutes: ${commafy(minutes)} \nSeconds: ${commafy(seconds)} \nMilliseconds: ${commafy(milliseconds)}`,
-    { reply_markup: data.keyboard, parse_mode: 'html', disable_web_page_preview: true }
+    { 
+      reply_markup: {
+        inline_keyboard: [[{text: '⤴️ Share', url: `t.me/share/url?url=${encodeURI(`@LifeDaysBot has said that I live already ${commafy(weeks)} weeks, ${commafy(days)} days, ${commafy(hours)} hours etc. Learn and you, how much days dou you live`)}`}]]
+      },
+      parse_mode: 'html',
+      disable_web_page_preview: true }
   )
 
   updateStat('date')
@@ -133,4 +138,15 @@ function makeDate () {
   dd < 10 ? dd = '0' + dd : false
   mm < 10 ? mm = '0' + mm : false
   return `${mm}/${dd}/${yyyy}`
+}
+
+function sendError (err, ctx) {
+  if (!ctx) {
+    return bot.telegram.sendMessage(data.dev, err)
+  }
+
+  bot.telegram.sendMessage(
+    data.dev,
+    `Error: \nUser: [${ctx.from.first_name}](tg://user?id=${ctx.from.id}) \nError's text: ${err}`
+  )
 }
