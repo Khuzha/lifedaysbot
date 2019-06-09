@@ -1,6 +1,7 @@
 const Telegraf = require('telegraf')
 const mongo = require('mongodb').MongoClient
 const data = require('./data')
+const zodiac = require('./zodiac')
 const bot = new Telegraf(data.token)
 
 mongo.connect(data.mongoLink, {useNewUrlParser: true}, (err, client) => {
@@ -64,6 +65,7 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
     `Now it's ${nowHours}:${nowMinutes}:${nowSeconds} ` + 
     `<a href="https://www.timeanddate.com/time/aboututc.html">UTC (Coordinated Universal Time)</a>, ` +
     `${today}.${thisMonth}.${thisYear}. \nYou were born in ${ctx.message.text}.` +
+    `\nYour zodiac sign is ${zodiac.getZodiacSign(textArr[0], textArr[1])}` +
     `\n\nYour life in: \n` + 
     `\nYears: ${years} \nMonths: ${commafy(months)} \nWeeks: ${commafy(weeks)} \nDays: ${commafy(days)}` +
     `\nHours: ${commafy(hours)} \nMinutes: ${commafy(minutes)} \nSeconds: ${commafy(seconds)} \nMilliseconds: ${commafy(milliseconds)}`,
@@ -111,12 +113,12 @@ bot.on('message', (ctx) => {
   updateUser(ctx, true)
 })
 
-function updateUser (ctx, active) {
+updateUser = (ctx, active) => {
   let jetzt = active ? 'active' : 'blocked'
   db.collection('allUsers').updateOne({userId: ctx.from.id}, {$set: {status: jetzt}}, {upsert: true, new: true})
 }
 
-function updateStat (action) {
+updateStat = (action) => {
   if (action == 'button') {
     return db.collection('statistic').updateOne({genAct: action}, {$inc: {count: 1}}, {new: true, upsert: true})
   }
@@ -125,11 +127,11 @@ function updateStat (action) {
   db.collection('statistic').updateOne({genAct: action}, {$inc: {count: 1}}, {new: true, upsert: true})
 }
 
-function commafy (num) {
+commafy = (num) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 }
 
-function makeDate () {
+makeDate = () => {
   const today = new Date()
   const yyyy = today.getFullYear()
   let mm = today.getMonth() + 1
@@ -140,7 +142,7 @@ function makeDate () {
   return `${mm}/${dd}/${yyyy}`
 }
 
-function sendError (err, ctx) {
+sendError = (err, ctx) => {
   if (!ctx) {
     return bot.telegram.sendMessage(data.dev, err)
   }
