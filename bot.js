@@ -46,7 +46,7 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
   const days = Math.floor(hours / 24)
   const weeks = Math.floor(days / 7)
   const months = Math.floor(days / 2 / 31 + days / 2 / 30)
-  const years = Math.floor(days / 365)
+  const years = Math.floor((days - Math.floor(days / 365 / 4)) / 365)
   
   now = new Date()
   let today = commafy(now.getDate())
@@ -69,7 +69,7 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
     `\nHours: ${commafy(hours)} \nMinutes: ${commafy(minutes)} \nSeconds: ${commafy(seconds)} \nMilliseconds: ${commafy(milliseconds)}`,
     { 
       reply_markup: {
-        inline_keyboard: [[{text: '⤴️ Share', url: `t.me/share/url?url=${encodeURI(`@LifeDaysBot has said that I live already ${commafy(weeks)} weeks, ${commafy(days)} days, ${commafy(hours)} hours etc. Learn and you, how much days dou you live`)}`}]]
+        inline_keyboard: [[{text: '⤴️ Share', url: `t.me/share/url?url=${encodeURI(`@LifeDaysBot has said that I live already ${commafy(weeks)} weeks, ${commafy(days)} days, ${commafy(hours)} hours etc. Learn, how much days do you live`)}`}]]
       },
       parse_mode: 'html',
       disable_web_page_preview: true }
