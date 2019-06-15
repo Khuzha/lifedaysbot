@@ -90,6 +90,32 @@ bot.hears('📁 Source code', (ctx) => {
   updateUser(ctx, true)
 })
 
+
+bot.command('users', async (ctx) => {
+  let allUsers = await db.collection('allUsers').find({}).toArray()
+  let activeUsers = 0
+  let blockedUsers = 0
+
+  for (let key of allUsers) {
+    await bot.telegram.sendChatAction(key.userId, 'typing')
+      .then((res) => {
+        activeUsers++
+      })
+      .catch((err) => {
+        blockedUsers++
+        updateUser(key.userId, false)
+      })
+
+  }
+
+  ctx.reply(
+    `⭕️ Total users: ${allUsers.length} ` +
+    `\n✅ Active users: ${activeUsers} - ${Math.round((activeUsers / allUsers.length) * 100)}%` +
+    `\n❌ Blocked users: ${blockedUsers} - ${Math.round((blockedUsers / allUsers.length) * 100)}%`
+  )
+})
+
+
 bot.on('message', (ctx) => {
   ctx.reply(
     'Message you sent me isn`t in correct format. Send me your birthday in format DD.MM.YYYY (e.g. 01.01.1990)',
@@ -98,9 +124,10 @@ bot.on('message', (ctx) => {
   updateUser(ctx, true)
 })
 
-updateUser = (ctx, active) => {
+updateUser = (userId, active) => {
+  typeof(userId) == 'object' ? userId = userId.from.id : false
   let jetzt = active ? 'active' : 'blocked'
-  db.collection('allUsers').updateOne({userId: ctx.from.id}, {$set: {status: jetzt}}, {upsert: true, new: true})
+  db.collection('allUsers').updateOne({userId: userId}, {$set: {status: jetzt}}, {upsert: true, new: true})
 }
 
 updateStat = (action) => {
