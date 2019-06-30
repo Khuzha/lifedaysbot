@@ -1,9 +1,20 @@
 const Telegraf = require('telegraf')
+const TelegrafI18n = require('telegraf-i18n')
+const path = require('path')
 const mongo = require('mongodb').MongoClient
 const data = require('./data')
 const zodiac = require('./zodiac')
 const calculator = require('./calculator')
 const bot = new Telegraf(data.token)
+
+const i18n = new TelegrafI18n({
+  defaultLanguage: 'en',
+  allowMissing: false, 
+  directory: path.resolve(__dirname, 'locales')
+})
+
+bot.use(Telegraf.session())
+bot.use(i18n.middleware())
 
 mongo.connect(data.mongoLink, {useNewUrlParser: true}, (err, client) => {
   if (err) {
@@ -14,30 +25,33 @@ mongo.connect(data.mongoLink, {useNewUrlParser: true}, (err, client) => {
   bot.startPolling()
 })
 
-bot.start((ctx) => {
-  ctx.reply(
-    'Send me your birthday in format DD.MM.YYYY (e.g. 01.01.1990)',
-    { reply_markup: data.keyboard }
+
+bot.start(({ replyWithHTML, message, from, i18n }) => {
+  replyWithHTML(
+    i18n.t('start'),
+    { reply_markup: { keyboard: [[i18n.t('buttons.stat'), i18n.t('buttons.source')]], resize_keyboard: true } }
   )
-  updateUser(ctx, true)
+  updateUser(from, true)
 })
 
-bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
-  const textArr = ctx.message.text.split('.')
+bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, ({ replyWithHTML, message, from, i18n }) => {
+  const textArr = message.text.split('.')
   const date = new Date(`${textArr[2]}-${textArr[1]}-${textArr[0]}`)
   let now = Date.now()
 
 
   if (textArr[0] > 28 && (textArr[2] % 4 !== 0) && textArr[1] == '02') {
-    return ctx.reply(`${textArr[2]} wasn't a leap year. Try again`)
+    return replyWithHTML(
+      i18n.t('notleap', { year: textArr[2] })
+    )
   }
 
   if (date == 'Invalid Date' || (textArr[1] == '02' && textArr[0] > 29)) {
-    return ctx.reply('Your date is invalid. Please send me correct one.')
+    return replyWithHTML(i18n.t('invalidDate'))
   }
   
   if (date > now) {
-    return ctx.reply('Was you born in the future? Please send a correct date.')
+    return replyWithHTML(i18n.t('futureDate'))
   }
   
   const { 
@@ -45,49 +59,53 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, (ctx) => {
     today, thisMonth, thisYear, nowHours, nowMinutes, nowSeconds
   } = calculator.getAge(date)
   
-
-  ctx.reply(
-    `Now it's ${nowHours}:${nowMinutes}:${nowSeconds} ` + 
-    `<a href="https://www.timeanddate.com/time/aboututc.html">UTC (Coordinated Universal Time)</a>, ` +
-    `${today}.${thisMonth}.${thisYear}. \nYou were born in ${ctx.message.text}.` +
-    `\nYour zodiac sign is ${zodiac.getZodiacSign(textArr[0], textArr[1])}` +
-    `\n\nYour life in: \n` + 
-    `\nYears: ${years} \nMonths: ${months} \nWeeks: ${weeks} \nDays: ${days}` +
-    `\nHours: ${hours} \nMinutes: ${minutes} \nSeconds: ${seconds} \nMilliseconds: ${milliseconds}`,
+  replyWithHTML(
+    i18n.t('finalReply', {
+      milliseconds: milliseconds, seconds: seconds, minutes: minutes,
+      hours: hours, days: days, weeks: weeks, months: months, years: years,
+      today: today, thisMonth: thisMonth, thisYear: thisYear, 
+      nowHours: nowHours, nowMinutes: nowMinutes, nowSeconds: nowSeconds,
+      zodiac: zodiac.getZodiacSign(textArr[0], textArr[1]),
+      bornDate: message.text
+    }),
     { 
       reply_markup: {
         inline_keyboard: [[{text: '⤴️ Share', url: `t.me/share/url?url=${encodeURI(`@LifeDaysBot has said that I live already ${commafy(weeks)} weeks, ${commafy(days)} days, ${commafy(hours)} hours etc. Learn, how much days do you live`)}`}]]
       },
-      parse_mode: 'html',
-      disable_web_page_preview: true }
+      disable_web_page_preview: true 
+    }
   )
 
   updateStat('date')
-  updateUser(ctx, true)
+  updateUser(from, true)
 })
 
-bot.hears('📈 Statistic', async (ctx) => {
+bot.hears(TelegrafI18n.match('buttons.stat'), async ({ replyWithHTML, replyWithChatAction, i18n }) => {
+  replyWithChatAction('typing')
+
   const allUsers = (await db.collection('allUsers').find({}).toArray()).length
   const activeUsers = (await db.collection('allUsers').find({status: 'active'}).toArray()).length
   const blockedUsers = (await db.collection('allUsers').find({status: 'blocked'}).toArray()).length
   const actions = await db.collection('statistic').find({genAct: 'date'}).toArray()
 
-  ctx.reply(
-    `👥 <strong>Total users: ${allUsers}</strong>` +
-    `\n🤴 Active users: ${activeUsers} - ${Math.round((activeUsers / allUsers) * 100)}%` +
-    `\n🧛‍♂️ Blocked users: ${blockedUsers} - ${Math.round((blockedUsers / allUsers) * 100)}%` +
-    `\n\n🕹 Dates checked: ${actions[0].count}`,
-    { reply_markup: data.keyboard, parse_mode: 'html' }
+  replyWithHTML(
+    i18n.t('statistic', {
+      allUsers: allUsers, activeUsers: activeUsers, blockedUsers: blockedUsers,
+      activeUsersPercent: Math.round((activeUsers / allUsers) * 100),
+      blockedUsersPercent: Math.round((blockedUsers / allUsers) * 100),
+      actions: actions[0].count
+    }),
+    { reply_markup: { keyboard: [[i18n.t('buttons.stat'), i18n.t('buttons.source')]], resize_keyboard: true } }
   )
 })
 
-bot.hears('📁 Source code', (ctx) => {
-  ctx.reply(
-    'You can see code of this bot on GitHub. Thanks for stars!', 
+bot.hears(TelegrafI18n.match('buttons.source'), ({ replyWithHTML, from, i18n }) => {
+  replyWithHTML(
+    i18n.t('source'), 
     { reply_markup: { inline_keyboard: [[{text: '🔗 GitHub', url: 'https://github.com/Khuzha/lifedaysbot'}]] } }
   )
 
-  updateUser(ctx, true)
+  updateUser(from, true)
 })
 
 
@@ -116,18 +134,18 @@ bot.command('users', async (ctx) => {
 })
 
 
-bot.on('message', (ctx) => {
-  ctx.reply(
-    'Message you sent me isn`t in correct format. Send me your birthday in format DD.MM.YYYY (e.g. 01.01.1990)',
-    { reply_markup: data.keyboard }
+bot.on('message', ({ replyWithHTML, from, i18n }) => {
+  replyWithHTML(
+    i18n.t('mistake'),
+    { reply_markup: { keyboard: [[i18n.t('buttons.stat'), i18n.t('buttons.source')]], resize_keyboard: true } }
   )
-  updateUser(ctx, true)
+  updateUser(from, true)
 })
 
-updateUser = (userId, active) => {
-  typeof(userId) == 'object' ? userId = userId.from.id : false
+updateUser = (from, active) => {
+  typeof(from) == 'object' ? from = from.id : false
   let jetzt = active ? 'active' : 'blocked'
-  db.collection('allUsers').updateOne({userId: userId}, {$set: {status: jetzt}}, {upsert: true, new: true})
+  db.collection('allUsers').updateOne({userId: from}, {$set: {status: jetzt}}, {upsert: true, new: true})
 }
 
 updateStat = (action) => {
