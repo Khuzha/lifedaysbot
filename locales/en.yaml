@@ -2,14 +2,16 @@ start: Send me your birthday in format DD.MM.YYYY (e.g. 01.01.1990)
 notLeap: ${year} wasn't a leap year. Try again
 invalidDate: Date you gave is invalid. Please send me correct one
 futureDate: Were you born in the future? Please send a correct date
-source: 'You can see code of this bot on GitHub. Thanks for stars!'
-mistake: 'Message you sent me isn`t in correct format. Send me your birthday in format DD.MM.YYYY (e.g. 01.01.1990)'
+source: You can see code of this bot on GitHub. Thanks for stars!
+press: Press here to send calculated data
+hwd: How much days do I live?
+mistake: Message you sent me isn`t in correct format. Send me your birthday in format DD.MM.YYYY (e.g. 01.01.1990)
 
 finalReply: >
   Now it's ${nowHours}:${nowMinutes}:${nowSeconds}
   <a href="https://www.timeanddate.com/time/aboututc.html">UTC (Coordinated Universal Time)</a>,
-  ${today}.${thisMonth}.${thisYear}. \nYou were born in ${bornDate}.
-  \nYour zodiac sign is ${zodiac}
+  ${today}.${thisMonth}.${thisYear}. \nIf you were born in ${bornDate}, then
+  \nYour zodiac sign is ${zodiac} and...
   \n\nYour life in: \n
   \nYears: ${years} \nMonths: ${months} \nWeeks: ${weeks} \nDays: ${days}
   \nHours: ${hours} \nMinutes: ${minutes} \nSeconds: ${seconds} \nMilliseconds: ${milliseconds}
@@ -19,6 +21,20 @@ statistic: >
   \n🤴 Active users: ${activeUsers} - ${activeUsersPercent}%
   \n🧛‍♂️ Blocked users: ${blockedUsers} - ${blockedUsersPercent}%
   \n\n🕹 Dates checked: ${actions}
+
+signs:
+  capricorn: capricorn
+  aquarius: aquarius
+  pisces: pisces
+  aries: aries
+  taurus: taurus
+  gemini: gemini
+  cancer: cancer
+  leo: leo
+  virgo: virgo
+  libra: libra
+  scorpio: scorpio
+  sagittarius: sagittarius
 
 buttons: 
   stat: 📈 Statistic

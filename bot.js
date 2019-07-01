@@ -3,8 +3,7 @@ const TelegrafI18n = require('telegraf-i18n')
 const path = require('path')
 const mongo = require('mongodb').MongoClient
 const data = require('./data')
-const zodiac = require('./zodiac')
-const calculator = require('./calculator')
+const makeMessage = require('./makeMessage')
 const bot = new Telegraf(data.token)
 
 const i18n = new TelegrafI18n({
@@ -34,43 +33,15 @@ bot.start(({ replyWithHTML, message, from, i18n }) => {
   updateUser(from, true)
 })
 
-bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, ({ replyWithHTML, message, from, i18n }) => {
-  const textArr = message.text.split('.')
-  const date = new Date(`${textArr[2]}-${textArr[1]}-${textArr[0]}`)
-  let now = Date.now()
-
-
-  if (textArr[0] > 28 && (textArr[2] % 4 !== 0) && textArr[1] == '02') {
-    return replyWithHTML(
-      i18n.t('notleap', { year: textArr[2] })
-    )
-  }
-
-  if (date == 'Invalid Date' || (textArr[1] == '02' && textArr[0] > 29)) {
-    return replyWithHTML(i18n.t('invalidDate'))
-  }
-  
-  if (date > now) {
-    return replyWithHTML(i18n.t('futureDate'))
-  }
-  
-  const { 
-    milliseconds, seconds, minutes, hours, days, weeks, months, years,
-    today, thisMonth, thisYear, nowHours, nowMinutes, nowSeconds
-  } = calculator.getAge(date)
+bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, async ({ replyWithHTML, message, from, i18n }) => { 
+  const text = await makeMessage(replyWithHTML, message, i18n)
+  if (!text) return false
   
   replyWithHTML(
-    i18n.t('finalReply', {
-      milliseconds: milliseconds, seconds: seconds, minutes: minutes,
-      hours: hours, days: days, weeks: weeks, months: months, years: years,
-      today: today, thisMonth: thisMonth, thisYear: thisYear, 
-      nowHours: nowHours, nowMinutes: nowMinutes, nowSeconds: nowSeconds,
-      zodiac: zodiac.getZodiacSign(textArr[0], textArr[1]),
-      bornDate: message.text
-    }),
+    text,
     { 
       reply_markup: {
-        inline_keyboard: [[{text: '⤴️ Share', url: `t.me/share/url?url=${encodeURI(`@LifeDaysBot has said that I live already ${commafy(weeks)} weeks, ${commafy(days)} days, ${commafy(hours)} hours etc. Learn, how much days do you live`)}`}]]
+        inline_keyboard: [[{text: '⤴️ Share', url: `t.me/share/url?url=${encodeURI(`@LifeDaysBot has said that I live already hours etc. Learn, how much days do you live`)}`}]]
       },
       disable_web_page_preview: true 
     }
@@ -79,6 +50,7 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, ({ replyWithHTML, message, from, i18
   updateStat('date')
   updateUser(from, true)
 })
+
 
 bot.hears(TelegrafI18n.match('buttons.stat'), async ({ replyWithHTML, replyWithChatAction, i18n }) => {
   replyWithChatAction('typing')
