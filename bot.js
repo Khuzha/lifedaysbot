@@ -34,7 +34,7 @@ bot.start(({ replyWithHTML, message, from, i18n }) => {
 })
 
 bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, async ({ replyWithHTML, message, from, i18n }) => { 
-  const text = await makeMessage(replyWithHTML, message, i18n)
+  const text = await makeMessage.mess(replyWithHTML, message, i18n)
   if (!text) return false
   
   replyWithHTML(
@@ -51,6 +51,20 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, async ({ replyWithHTML, message, fro
   updateUser(from, true)
 })
 
+console.log(!'2'.match(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/))
+
+bot.on('inline_query', async ({ answerInlineQuery, update, i18n }) => {
+  const query = update.inline_query.query
+  const count = (await db.collection('statistic').find({genAct: 'date'}).toArray())[0].count + 1
+
+  // if (!query.trim().match(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/)) {
+  //   return false
+  // }
+  
+  makeMessage.query(answerInlineQuery, update, i18n, count)
+  
+  updateStat('date')
+})
 
 bot.hears(TelegrafI18n.match('buttons.stat'), async ({ replyWithHTML, replyWithChatAction, i18n }) => {
   replyWithChatAction('typing')
@@ -150,3 +164,5 @@ sendError = (err, ctx) => {
     `Error: \nUser: [${ctx.from.first_name}](tg://user?id=${ctx.from.id}) \nError's text: ${err}`
   )
 }
+
+bot.catch((err) => console.log(err))

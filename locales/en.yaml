@@ -4,8 +4,13 @@ invalidDate: Date you gave is invalid. Please send me correct one
 futureDate: Were you born in the future? Please send a correct date
 source: You can see code of this bot on GitHub. Thanks for stars!
 press: Press here to send calculated data
-hwd: How much days do I live?
+hmd: How much days do I live?
 mistake: Message you sent me isn`t in correct format. Send me your birthday in format DD.MM.YYYY (e.g. 01.01.1990)
+invalidQueryDate: Your date isn`t correct. Type in format 01.01.1990
+queryAgain: Try again
+invalidQueryDateText: |
+  I wanted to send my life in months, weeks, days, hours etc, but I`ve written not correct data. \n
+  '*Bot: please send date in format 01.01.1990*'
 
 finalReply: >
   Now it's ${nowHours}:${nowMinutes}:${nowSeconds}
@@ -13,6 +18,15 @@ finalReply: >
   ${today}.${thisMonth}.${thisYear}. \nIf you were born in ${bornDate}, then
   \nYour zodiac sign is ${zodiac} and...
   \n\nYour life in: \n
+  \nYears: ${years} \nMonths: ${months} \nWeeks: ${weeks} \nDays: ${days}
+  \nHours: ${hours} \nMinutes: ${minutes} \nSeconds: ${seconds} \nMilliseconds: ${milliseconds}
+
+queryReply: >
+  Now it's ${nowHours}:${nowMinutes}:${nowSeconds}
+  <a href="https://www.timeanddate.com/time/aboututc.html">UTC (Coordinated Universal Time)</a>,
+  ${today}.${thisMonth}.${thisYear}. \nI was born in ${bornDate}
+  \nMy zodiac sign is ${zodiac} and...
+  \n\nMy life in: \n
   \nYears: ${years} \nMonths: ${months} \nWeeks: ${weeks} \nDays: ${days}
   \nHours: ${hours} \nMinutes: ${minutes} \nSeconds: ${seconds} \nMilliseconds: ${milliseconds}
 
