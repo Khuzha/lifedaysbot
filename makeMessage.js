@@ -44,9 +44,6 @@ async function query (answerInlineQuery, update, i18n, count) {
   const date = new Date(`${textArr[2]}-${textArr[1]}-${textArr[0]}`)
   const now = Date.now()
 
-  console.log(query)
-  console.log(!query.trim().match(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/))
-
   if (
     !query.trim().match(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/) ||
     (textArr[0] > 28 && (textArr[2] % 4 !== 0) && textArr[1] == '02') ||

@@ -41,7 +41,7 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, async ({ replyWithHTML, message, fro
     text,
     { 
       reply_markup: {
-        inline_keyboard: [[{text: '⤴️ Share', url: `t.me/share/url?url=${encodeURI(`@LifeDaysBot has said that I live already hours etc. Learn, how much days do you live`)}`}]]
+        inline_keyboard: [[{text: '⤴️ Share', switch_inline_query: message.text}]]
       },
       disable_web_page_preview: true 
     }
@@ -51,15 +51,15 @@ bot.hears(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/, async ({ replyWithHTML, message, fro
   updateUser(from, true)
 })
 
-console.log(!'2'.match(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/))
+// console.log(!'2'.match(/^[0-9]{2?}\.[0-9]{2}\.[0-9]{4}$/))
 
 bot.on('inline_query', async ({ answerInlineQuery, update, i18n }) => {
   const query = update.inline_query.query
   const count = (await db.collection('statistic').find({genAct: 'date'}).toArray())[0].count + 1
 
-  // if (!query.trim().match(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/)) {
-  //   return false
-  // }
+  if (!query.trim().match(/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/)) {
+    return false
+  }
   
   makeMessage.query(answerInlineQuery, update, i18n, count)
   
